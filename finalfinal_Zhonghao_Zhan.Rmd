@@ -1,0 +1,731 @@
+---
+title: "352SemProj-Final-Zhonghao Zhan"
+author: "Zhonghao Zhan"
+date: "July 27, 2017"
+output:
+  word_document:
+    toc: yes
+    toc_depth: '5'
+  pdf_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, include=FALSE}
+
+
+library(eemR)
+ls("package:eemR")
+
+meta1 <- read.csv("/Users/Zhan/Desktop/17-PET_Fluorescence/PET-Fluorescence/pet_exposure_key.csv")
+meta2 <- read.csv("/Users/Zhan/Desktop/17-PET_Fluorescence/PET-Fluorescence/pet_sample_key.csv")
+
+
+ file1 <- system.file("extdata/cary/Baseline", package = "eemR")
+eems1 <- eem_read(file1)
+
+
+
+
+
+```
+
+# Abstract
+
+Understanding the degradation of photovoltaic (PV) materials is necessary in order to predict the lifetime of modules. In the layout of the PV module, poly (ethylene terephthalate) (PET) is a core component of the polymer back sheet. The characteristics of low cost and dielectric made it an ideal material for back sheets that were used as electrical and environmental barriers in the PV System. However, according to the Norrish degradation mechanisms, PET material is influenced by environmental stressors, such as ultraviolet (UV) light, heat, and humidity. Affected by those factors, PET materials could lose its mechanical strength and dielectric properties during the process of degradation. The goal of the project is to analyze PET film degradation during its warranty lifetime via fluorescence spectroscopy. With the simulated real-world outdoor data which were taken from samples exposed to accelerated conditions of temperature, humidity, and UV irradiance, the analysis will provide a 3D excitation-emission spectrum for PET Films after exposures. It will also make several corrections to remove the interference factors, such as Raleigh & Raman scatters and negative values. The signals and trends gathered from the excitation-emission spectra could also be helpful for the insight of the PET degradation process. With the corrected data, the report will perform parallel factor analysis (PARAFAC) on the spectra grouped by exposure to identify the independent underlying signals. This procedure will complement the visualized data (excitation-emission Spectra) with quantification.
+
+# Project Background and Introduction
+
+This project works on weathering study data from indoor exposure of clear poly(ethylene terephthalate) films. These data are taken step-wise, where the samples are exposed to accelerated conditions of temperature, humidity and UV irradiance relative to real-world, outdoor conditions in order to more quickly understand the degradation behavior of the materials.
+
+![Condensation](/Users/Zhan/Desktop/17-PET_Fluorescence/condensation.jpg)
+The condensation reaction of terephthalic acid and ethylene glycol to form PET
+
+PET...
+
+● Is a condensation polymer of terephthalic acid/dimethyl terephthalate and ethylene
+glycol
+● Is commonly found in the form of plastic bottles
+● Has a specialty application in photovoltaic (PV) backsheets
+
+![PV modules](/Users/Zhan/Desktop/17-PET_Fluorescence/PV module.jpg)
+Layout of a PV module
+
+● Backsheets are electrical and environmental barriers for PV modules.
+● PET is used as a core layer in backsheets for its high dielectric breakdown strength and low cost.
+● PET is susceptible to degradation by environmental stressors such as heat, humidity,and ultraviolet (UV) light.
+● Degradation of PET causes changes in its chemical structure that lead to loss of dielectric breakdown strength and mechanical properties.
+
+![Degradation Mechanism](/Users/Zhan/Desktop/17-PET_Fluorescence/mechanism.jpg)
+Norrish degradation mechanisms for PET
+
+● UV and humidity exposure cause degradation through chain scission mechanisms.
+● Increases in temperature cause acceleration of degradation processes.
+● UV stabilizers function to scavenge radicals, absorb and screen damaging radiation to
+temporarily
+● protect the polymer, or quench electronically excited states.
+● Hydrolytic stabilizers act as water and acid scavengers and convert both into neutral urea structures.
+● The degradation of PET can be monitored via fluorescence/luminescence spectroscopy.
+Luminescence/Fluorescence Spectroscopy:
+https://en.wikipedia.org/wiki/Fluorescence_spectroscopy
+
+
+
+● Fluorescence involves using light to electronically excite a material and subsequent
+detection and analysis of the light emitted by the material upon relaxation.
+● Material structure determines the range of wavelength absorbed by the material and
+features of the emitted light.
+● Enables the characterization of polymers by electronic structure
+● Allows observation of changes in polymer structure due to degradation.
+● 3-Dimensional excitation emission matrix plots were generated for each exposure step to observe changes in the fluorescence behavior of the material after time in exposure
+
+![Example](/Users/Zhan/Desktop/17-PET_Fluorescence/example.jpg)
+Example of 3D Excitation-Emission Spectra for PET Films after QUV Exposure
+
+# Exposure and Measurement
+Luminescence Spectroscopy
+● 3D Excitation Emission spectra were measured with a Agilent Cary Eclipse
+Spectrophotometer following each exposure step
+● Measurements were conducted on the retained sample from the exposure protocol
+
+One sample was retained (removed from study) following each exposure step, so the number of samples for a given material under a given exposure will decrease by 1 from step to step.
+
+## Hot QUV
+168 hr (one week) time steps
+○ Continuous exposure to UVA-340 light at 1.55 W/m 2 /nm and 70 °C
+
+## Cyclic QUV
+168 hr (one week) time steps
+○ 8 hrs of exposure to UVA-340 light at 1.55 W/m 2 /nm and 70 °C followed by
+4 hrs of darkness and condensing humidity at 50 °C
+
+## Damp heat
+304 hr (two week) time steps
+○ Continuous exposure at 85 °C and at 85 °C relative humidity
+
+# Databook
+
+## Metadata (Also predictors)
+Sample : each sample is assigned a unique identifier, first 5 digits identify original film sheet, second 5 digits describe which subsample of that sheet
+Material : defines the type of PET film, the films vary in composition
+Exposure : defines the accelerated exposure that the film underwent
+
+## Predictors
+Time : defines the amount of time cumulative spent under exposure at the time of
+measurement
+
+## Responses
+Fluorescence Spectra : spectra which shows intensity of light emitted by a sample at a
+given wavelength (energy) versus the wavelength used to cause the excitation phenomena
+material; changes in the peaks in the spectra correspond to the formation and degradation of
+chemical species within the materials with increasing exposure time.
+● Data saved as .spc files
+
+# Project Aim
+
+1. Load excitation-emission spectra into R using the eemR package.
+2. Plot excitation-emission spectra using the eemR package.
+3. Remove negative values and Raleigh/Raman scatter from the excitation-emission
+spectra.
+4. General EDA and plotting of corrected spectra. Provide insights about the data gain
+from EDA and analyze the trends with increasing exposure time/steps.
+5. Study and explain the concept of parallel factor analysis (PARAFAC)
+6. Perform parallel factor analysis on spectra grouped by exposure
+7. Provide visualization for PARAFAC results.
+8. Attempt to interpret PARAFAC results
+
+# Package
+● eemR
+Provides various tools for preprocessing Emission-Excitation Matrix (EEM) for Parallel Factor Analysis (PARAFAC). Different methods are also provided to calculate common metrics such as humification index and fluorescence index.
+
+●shiny
+Makes it incredibly easy to build interactive web applications with R. Automatic "reactive"" binding between inputs and outputs and extensive prebuilt widgets make it possible to build beautiful, responsive, and powerful applications with minimal effort.
+
+● Multiway (search for parafac function)
+Fits multi-way component models via alternating least squares algorithms with optional constraints: orthogonal, non-negative, unimodal, monotonic, periodic, smooth, or structure.
+Fit models include Individual Differences Scaling, Parallel Factor Analysis (1 and 2), Simultaneous Component Analysis, and Tucker Factor Analysis.
+
+● PLS_toolbox (Matlab)
+It takes its name from the Partial Least Squares (PLS) regression method, which has become the standard calibration method in many calibration and modelling applications. It contains all the software tools chemical engineers, analytical chemists and other analysis-driven scientists require to fully utilize their data and build predictive models.
+
+● drEEM toolbox (Matlab)
+The drEEM toolbox combines two toolboxes: the DOMFluor toolbox which introduced several algorithms to define and test the right number of components of a PARAFAC model) and the FDOMcorr toolbox which conducts the neccessary pre-processing steps to make the fluorescence data comparable between instruments and studies). The procedures of these two toolboxes are furthermore extended by additional visualisation functions and other functions to support and simplify modelling of Excitation-Emission-Matrices (EEMs) of natural CDOM with PARAFAC .
+
+# Data Cleaning and Correction
+
+## .csv header issue
+ First, the issue is in the header of the .csv files. If you notice, the header of the CyclicQUV-step1 is different from that of the others. And only this file is in correct form.
+ ![Example](/Users/Zhan/Desktop/17-PET_Fluorescence/header2.png)
+ 
+ The rest of other files don't have the header which show the intensity data, as a result, they can't be process directly.
+ ![Example](/Users/Zhan/Desktop/17-PET_Fluorescence/header1.png)
+ 
+ To address this issue, several corrections need to be made.
+
+## Header correction script
+I write a correction script that takes the format of the first two header rows and makes the remainder of the .csv files look the same way.
+After the correction, the files can be read properly, but you may run into other errors.
+![Example](/Users/Zhan/Desktop/17-PET_Fluorescence/em.png)
+This time, although the file successfully imported, the emission min and max are missing. So I look into the lists inside the eemlist to find the errors.
+![Example](/Users/Zhan/Desktop/17-PET_Fluorescence/test.png)
+Note that the $em, which holds the emission wavelengths, has 704 values. This is incorrect, since the range of emission wavelengths is 300-800 the value should be 501.
+![Example](/Users/Zhan/Desktop/17-PET_Fluorescence/list.png)
+I correct this by addressing inside the eemlist and replacing that vector with only the first 501 values, and removing the NAs.
+
+Now note in the $x matrix, where the fluorescence intensity values are stored, the number of values are 704 and 102. We already know the issue with the 704, we have to take only the first 501 values. And the 102 should be 101 because there were a total of 101 fluorescence spectra measured if you look inside the .csv; one spectrum was measured every 5nm from 300 to 800 in excitation, so 101 in total.
+![Example](/Users/Zhan/Desktop/17-PET_Fluorescence/code.png)
+I correct this by addressing inside the eemlist and taking the proper dimensions and leaving out the NA data (you can check for the NAs yourself to see is they are present)
+
+The plotting then works.
+
+# Data Visualization
+
+## CyclicQUV
+
+Step 1
+```{r}
+library(eemR)
+ls("package:eemR")
+cstep1 <- system.file("extdata/cary/CyclicQUV/step1/3DEEM/", package = "eemR")
+eemsc1 <- eem_read(cstep1)
+
+summary(eemsc1)
+
+plot(eemsc1, which=2)
+
+
+```
+Step 2
+```{r}
+
+
+cstep2 <- system.file("extdata/cary/CyclicQUV/step2/3DEEM/", package = "eemR")
+eemsc2 <- eem_read(cstep2)
+
+eemsc2[[1]]$em<-eemsc2[[1]]$em[1:501]
+eemsc2[[1]]$x<-eemsc2[[1]]$x[c(1:501),c(1:101)]
+eemsc2[[2]]$em<-eemsc2[[2]]$em[1:501]
+eemsc2[[2]]$x<-eemsc2[[2]]$x[c(1:501),c(1:101)]
+eemsc2[[3]]$em<-eemsc2[[3]]$em[1:501]
+eemsc2[[3]]$x<-eemsc2[[3]]$x[c(1:501),c(1:101)]
+eemsc2[[4]]$em<-eemsc2[[4]]$em[1:501]
+eemsc2[[4]]$x<-eemsc2[[4]]$x[c(1:501),c(1:101)]
+eemsc2[[5]]$em<-eemsc2[[5]]$em[1:501]
+eemsc2[[5]]$x<-eemsc2[[5]]$x[c(1:501),c(1:101)]
+eemsc2[[6]]$em<-eemsc2[[6]]$em[1:501]
+eemsc2[[6]]$x<-eemsc2[[6]]$x[c(1:501),c(1:101)]
+
+
+
+plot(eemsc2, which=2)
+```
+Step 3
+```{r}
+
+cstep3 <- system.file("extdata/cary/CyclicQUV/step3/3DEEM/", package = "eemR")
+eemsc3 <- eem_read(cstep3)
+
+eemsc3[[1]]$em<-eemsc3[[1]]$em[1:501]
+eemsc3[[1]]$x<-eemsc3[[1]]$x[c(1:501),c(1:101)]
+eemsc3[[2]]$em<-eemsc3[[2]]$em[1:501]
+eemsc3[[2]]$x<-eemsc3[[2]]$x[c(1:501),c(1:101)]
+eemsc3[[3]]$em<-eemsc3[[3]]$em[1:501]
+eemsc3[[3]]$x<-eemsc3[[3]]$x[c(1:501),c(1:101)]
+eemsc3[[4]]$em<-eemsc3[[4]]$em[1:501]
+eemsc3[[4]]$x<-eemsc3[[4]]$x[c(1:501),c(1:101)]
+eemsc3[[5]]$em<-eemsc3[[5]]$em[1:501]
+eemsc3[[5]]$x<-eemsc3[[5]]$x[c(1:501),c(1:101)]
+eemsc3[[6]]$em<-eemsc3[[6]]$em[1:501]
+eemsc3[[6]]$x<-eemsc3[[6]]$x[c(1:501),c(1:101)]
+
+
+
+plot(eemsc3, which=2)
+```
+Step 4
+```{r}
+
+cstep4 <- system.file("extdata/cary/CyclicQUV/step4/3DEEM/", package = "eemR")
+eemsc4 <- eem_read(cstep4)
+
+eemsc4[[1]]$em<-eemsc4[[1]]$em[1:501]
+eemsc4[[1]]$x<-eemsc4[[1]]$x[c(1:501),c(1:101)]
+eemsc4[[2]]$em<-eemsc4[[2]]$em[1:501]
+eemsc4[[2]]$x<-eemsc4[[2]]$x[c(1:501),c(1:101)]
+eemsc4[[3]]$em<-eemsc4[[3]]$em[1:501]
+eemsc4[[3]]$x<-eemsc4[[3]]$x[c(1:501),c(1:101)]
+eemsc4[[4]]$em<-eemsc4[[4]]$em[1:501]
+eemsc4[[4]]$x<-eemsc4[[4]]$x[c(1:501),c(1:101)]
+eemsc4[[5]]$em<-eemsc4[[5]]$em[1:501]
+eemsc4[[5]]$x<-eemsc4[[5]]$x[c(1:501),c(1:101)]
+eemsc4[[6]]$em<-eemsc4[[6]]$em[1:501]
+eemsc4[[6]]$x<-eemsc4[[6]]$x[c(1:501),c(1:101)]
+
+
+plot(eemsc4, which=2)
+```
+
+
+## DampHeat
+
+Step 1
+```{r}
+library(eemR)
+ls("package:eemR")
+dstep1 <- system.file("extdata/cary/DampHeat/step1/3DEEM/", package = "eemR")
+eemsd1 <- eem_read(dstep1)
+
+eemsd1[[1]]$em<-eemsd1[[1]]$em[1:501]
+eemsd1[[1]]$x<-eemsd1[[1]]$x[c(1:501),c(1:101)]
+eemsd1[[2]]$em<-eemsd1[[2]]$em[1:501]
+eemsd1[[2]]$x<-eemsd1[[2]]$x[c(1:501),c(1:101)]
+eemsd1[[3]]$em<-eemsd1[[3]]$em[1:501]
+eemsd1[[3]]$x<-eemsd1[[3]]$x[c(1:501),c(1:101)]
+eemsd1[[4]]$em<-eemsd1[[4]]$em[1:501]
+eemsd1[[4]]$x<-eemsd1[[4]]$x[c(1:501),c(1:101)]
+eemsd1[[5]]$em<-eemsd1[[5]]$em[1:501]
+eemsd1[[5]]$x<-eemsd1[[5]]$x[c(1:501),c(1:101)]
+eemsd1[[6]]$em<-eemsd1[[6]]$em[1:501]
+eemsd1[[6]]$x<-eemsd1[[6]]$x[c(1:501),c(1:101)]
+
+plot(eemsd1, which=2)
+
+
+```
+Step 2
+```{r}
+
+dstep2 <- system.file("extdata/cary/DampHeat/step2/3DEEM/", package = "eemR")
+eemsd2 <- eem_read(dstep2)
+
+eemsd2[[1]]$em<-eemsd2[[1]]$em[1:501]
+eemsd2[[1]]$x<-eemsd2[[1]]$x[c(1:501),c(1:101)]
+eemsd2[[2]]$em<-eemsd2[[2]]$em[1:501]
+eemsd2[[2]]$x<-eemsd2[[2]]$x[c(1:501),c(1:101)]
+eemsd2[[3]]$em<-eemsd2[[3]]$em[1:501]
+eemsd2[[3]]$x<-eemsd2[[3]]$x[c(1:501),c(1:101)]
+eemsd2[[4]]$em<-eemsd2[[4]]$em[1:501]
+eemsd2[[4]]$x<-eemsd2[[4]]$x[c(1:501),c(1:101)]
+eemsd2[[5]]$em<-eemsd2[[5]]$em[1:501]
+eemsd2[[5]]$x<-eemsd2[[5]]$x[c(1:501),c(1:101)]
+eemsd2[[6]]$em<-eemsd2[[6]]$em[1:501]
+eemsd2[[6]]$x<-eemsd2[[6]]$x[c(1:501),c(1:101)]
+plot(eemsd2, which=2)
+```
+Step 3
+```{r}
+
+dstep3 <- system.file("extdata/cary/DampHeat/step3/3DEEM/", package = "eemR")
+eemsd3 <- eem_read(dstep3)
+
+eemsd3[[1]]$em<-eemsd3[[1]]$em[1:501]
+eemsd3[[1]]$x<-eemsd3[[1]]$x[c(1:501),c(1:101)]
+eemsd3[[2]]$em<-eemsd3[[2]]$em[1:501]
+eemsd3[[2]]$x<-eemsd3[[2]]$x[c(1:501),c(1:101)]
+eemsd3[[3]]$em<-eemsd3[[3]]$em[1:501]
+eemsd3[[3]]$x<-eemsd3[[3]]$x[c(1:501),c(1:101)]
+eemsd3[[4]]$em<-eemsd3[[4]]$em[1:501]
+eemsd3[[4]]$x<-eemsd3[[4]]$x[c(1:501),c(1:101)]
+eemsd3[[5]]$em<-eemsd3[[5]]$em[1:501]
+eemsd3[[5]]$x<-eemsd3[[5]]$x[c(1:501),c(1:101)]
+eemsd3[[6]]$em<-eemsd3[[6]]$em[1:501]
+eemsd3[[6]]$x<-eemsd3[[6]]$x[c(1:501),c(1:101)]
+plot(eemsd3, which=2)
+
+```
+Step 4
+```{r}
+
+dstep4 <- system.file("extdata/cary/DampHeat/step4/3DEEM/", package = "eemR")
+eemsd4 <- eem_read(dstep4)
+
+eemsd4[[1]]$em<-eemsd4[[1]]$em[1:501]
+eemsd4[[1]]$x<-eemsd4[[1]]$x[c(1:501),c(1:101)]
+eemsd4[[2]]$em<-eemsd4[[2]]$em[1:501]
+eemsd4[[2]]$x<-eemsd4[[2]]$x[c(1:501),c(1:101)]
+eemsd4[[3]]$em<-eemsd4[[3]]$em[1:501]
+eemsd4[[3]]$x<-eemsd4[[3]]$x[c(1:501),c(1:101)]
+eemsd4[[4]]$em<-eemsd4[[4]]$em[1:501]
+eemsd4[[4]]$x<-eemsd4[[4]]$x[c(1:501),c(1:101)]
+eemsd4[[5]]$em<-eemsd4[[5]]$em[1:501]
+eemsd4[[5]]$x<-eemsd4[[5]]$x[c(1:501),c(1:101)]
+eemsd4[[6]]$em<-eemsd4[[6]]$em[1:501]
+eemsd4[[6]]$x<-eemsd4[[6]]$x[c(1:501),c(1:101)]
+plot(eemsd4, which=2)
+
+```
+
+## HotQUV
+Step 1
+```{r}
+library(eemR)
+ls("package:eemR")
+hstep1 <- system.file("extdata/cary/HotQUV/step1/3DEEM/", package = "eemR")
+eemsh1 <- eem_read(hstep1)
+
+eemsh1[[1]]$em<-eemsh1[[1]]$em[1:501]
+eemsh1[[1]]$x<-eemsh1[[1]]$x[c(1:501),c(1:101)]
+eemsh1[[2]]$em<-eemsh1[[2]]$em[1:501]
+eemsh1[[2]]$x<-eemsh1[[2]]$x[c(1:501),c(1:101)]
+eemsh1[[3]]$em<-eemsh1[[3]]$em[1:501]
+eemsh1[[3]]$x<-eemsh1[[3]]$x[c(1:501),c(1:101)]
+eemsh1[[4]]$em<-eemsh1[[4]]$em[1:501]
+eemsh1[[4]]$x<-eemsh1[[4]]$x[c(1:501),c(1:101)]
+eemsh1[[5]]$em<-eemsh1[[5]]$em[1:501]
+eemsh1[[5]]$x<-eemsh1[[5]]$x[c(1:501),c(1:101)]
+eemsh1[[6]]$em<-eemsh1[[6]]$em[1:501]
+eemsh1[[6]]$x<-eemsh1[[6]]$x[c(1:501),c(1:101)]
+
+plot(eemsh1, which=2)
+```
+
+Step 2
+```{r}
+
+hstep2 <- system.file("extdata/cary/HotQUV/step2/3DEEM/", package = "eemR")
+eemsh2 <- eem_read(hstep2)
+
+eemsh2[[1]]$em<-eemsh2[[1]]$em[1:501]
+eemsh2[[1]]$x<-eemsh2[[1]]$x[c(1:501),c(1:101)]
+eemsh2[[2]]$em<-eemsh2[[2]]$em[1:501]
+eemsh2[[2]]$x<-eemsh2[[2]]$x[c(1:501),c(1:101)]
+eemsh2[[3]]$em<-eemsh2[[3]]$em[1:501]
+eemsh2[[3]]$x<-eemsh2[[3]]$x[c(1:501),c(1:101)]
+eemsh2[[4]]$em<-eemsh2[[4]]$em[1:501]
+eemsh2[[4]]$x<-eemsh2[[4]]$x[c(1:501),c(1:101)]
+eemsh2[[5]]$em<-eemsh2[[5]]$em[1:501]
+eemsh2[[5]]$x<-eemsh2[[5]]$x[c(1:501),c(1:101)]
+eemsh2[[6]]$em<-eemsh2[[6]]$em[1:501]
+eemsh2[[6]]$x<-eemsh2[[6]]$x[c(1:501),c(1:101)]
+plot(eemsh2, which=2)
+```
+
+Step 3
+```{r}
+
+
+hstep3 <- system.file("extdata/cary/HotQUV/step3/3DEEM/", package = "eemR")
+eemsh3 <- eem_read(hstep3)
+
+eemsh3[[1]]$em<-eemsh3[[1]]$em[1:501]
+eemsh3[[1]]$x<-eemsh3[[1]]$x[c(1:501),c(1:101)]
+eemsh3[[2]]$em<-eemsh3[[2]]$em[1:501]
+eemsh3[[2]]$x<-eemsh3[[2]]$x[c(1:501),c(1:101)]
+eemsh3[[3]]$em<-eemsh3[[3]]$em[1:501]
+eemsh3[[3]]$x<-eemsh3[[3]]$x[c(1:501),c(1:101)]
+eemsh3[[4]]$em<-eemsh3[[4]]$em[1:501]
+eemsh3[[4]]$x<-eemsh3[[4]]$x[c(1:501),c(1:101)]
+eemsh3[[5]]$em<-eemsh3[[5]]$em[1:501]
+eemsh3[[5]]$x<-eemsh3[[5]]$x[c(1:501),c(1:101)]
+eemsh3[[6]]$em<-eemsh3[[6]]$em[1:501]
+eemsh3[[6]]$x<-eemsh3[[6]]$x[c(1:501),c(1:101)]
+plot(eemsh3, which=2)
+```
+
+Step 4
+```{r}
+
+hstep4 <- system.file("extdata/cary/HotQUV/step4/3DEEM/", package = "eemR")
+eemsh4 <- eem_read(hstep4)
+
+eemsh4[[1]]$em<-eemsh4[[1]]$em[1:501]
+eemsh4[[1]]$x<-eemsh4[[1]]$x[c(1:501),c(1:101)]
+eemsh4[[2]]$em<-eemsh4[[2]]$em[1:501]
+eemsh4[[2]]$x<-eemsh4[[2]]$x[c(1:501),c(1:101)]
+eemsh4[[3]]$em<-eemsh4[[3]]$em[1:501]
+eemsh4[[3]]$x<-eemsh4[[3]]$x[c(1:501),c(1:101)]
+eemsh4[[4]]$em<-eemsh4[[4]]$em[1:501]
+eemsh4[[4]]$x<-eemsh4[[4]]$x[c(1:501),c(1:101)]
+eemsh4[[5]]$em<-eemsh4[[5]]$em[1:501]
+eemsh4[[5]]$x<-eemsh4[[5]]$x[c(1:501),c(1:101)]
+eemsh4[[6]]$em<-eemsh4[[6]]$em[1:501]
+eemsh4[[6]]$x<-eemsh4[[6]]$x[c(1:501),c(1:101)]
+plot(eemsh4, which=2)
+
+```
+# Study of Second-order emission spectrum 
+
+"Another source of unwanted light is higher-order light diffraction by the monochromator. Light diffraction at the grating can occur as a first-, second-, or higher-order process. These diffraction orders frequently overlap. Suppose the excitation monochromator is set at 300 nm. The xenon light source contains output of both 300 and 600 nm. When the monochromator is set at 600 nm, some 300-nm light can be present at the exit slit due to second-order diffraction. Hence, when recording an emission spectrum from a turbid solution, one will often observe a peak at twice the excitation wavelength due to second-order transmission through the excitation monochromator. For this reason, we often use bandpass excitation filters to remove unwanted wavelengths from the excitation beam.
+Transmission of the second-order diffraction can also result in extraneous light passing through the emission monochromators. Suppose the excitation is at 300 nm, and the emission monochromator is scanned through 600 nm. If the sample is strongly scattering, then some of the scattered light at 300 nm can appear as second-order diffraction when the emission monochromator is set to 600 nm." (Lakowicz, Joseph.Principles of Fluorescence Spectroscopy, 1983)
+
+![Second Order](/Users/Zhan/Desktop/17-PET_Fluorescence/second order.png)
+
+# Definition of Raleigh/Raman scatter
+
+Scattering removal：Remove the the so-called scattering bands caused by first and second order of Raman and Rayleigh scattering.
+
+Rayleigh and Raman scattering are optical processes by which some of the incident energy can be absorbed and converted into vibrational and rotational energy (Lakowicz 2006). The resulting scattered energy produce the so-called scattering bands which are visually easily identifiable. Given that both types of scattering are repeated across EEMs, it is important to remove such artifacts prior to analysis (Bahram et al. 2006; Zepp, Sheldon, and Moran 2004).
+
+![Rayleigh and Raman](/Users/Zhan/Desktop/17-PET_Fluorescence/Rayleigh and Raman.png)
+Emission fluorescence emitted at excitation ex=350. First order of Rayleigh and Raman scattering regions are identified in blue and red.
+
+First order of Rayleigh scattering is defined as the region where emission is equal to excitation (em=ex) causing a diagonal band in the EEM (excitation-emission fluorescence matrix) whereas the second order of Rayleigh scattering occurs at two times the emission wavelength of the primary peak (em=2ex).  Mathematically, first order Raman scattering is defined as follow:
+![Raman1](/Users/Zhan/Desktop/17-PET_Fluorescence/Raman1.png)
+where ex is the incident excitation wavelength (nm). Second order Raman scattering is then simply defined as:
+![Raman2](/Users/Zhan/Desktop/17-PET_Fluorescence/Raman2.png)
+
+Different interpolation techniques have been proposed to eliminate scattering (Zepp, Sheldon, and Moran 2004; Bahram et al. 2006). However, it is a common practice to simply remove the scattering-bands by inserting missing values at the corresponding positions (Murphy et al. 2013; C. A. Stedmon and Bro 2008).
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/EEM.png)
+
+Different interpolation techniques have been proposed to eliminate scattering (Zepp, Sheldon, and Moran 2004; Bahram et al. 2006). However, it is a common practice to simply remove the scattering-bands by inserting missing values (Fig. 3) at the corresponding positions (Murphy et al. 2013; C. A. Stedmon and Bro 2008).
+
+# Removing Raleigh/Raman scatter
+
+## Scatter removal procedure
+
+At the first step, I follow the suggestion of the eemR package, remove both the first order Raman scatter and Rayleigh scatter. Here, I use Cyclic QUV Step 1 as example.
+
+```{r}
+eemsc1 <- eem_remove_scattering(eemsc1, "rayleigh", 1, 10)
+eemsc1 <- eem_remove_scattering(eemsc1, "raman", 1, 10)
+
+plot(eemsc1, which = 2)
+
+```
+Apparently, the second order emission on top left corner has not been removed. And the removal of Raman scatter overlaps the signal reflecting area of the material. Since the Raman scatter is not affacting the spectra here, I decide to cancel this step. Instead, I remove the second order Rayleigh scatter of the spectra.
+
+The other problem here is the residual scatters. Although this 2D plot shows most of the residuals have been removed,it has been proved later in 3D model that the residual scatters are still evident in the datasets. This fact shows that the scattering are not completely removed using a bandwidth of 10 nm. In addition, since the eemR doesn't have functions to remove negative values, these outliers have not been removed as well, and they will impact the accurancy of the spectra.
+
+As a result, I choose to increase the bandwidth of the missing values insertions to see if I can resolve this problem. We I increase the bandwidth to 30nm, the missing values overlap most of the negative values.
+
+
+## Cyclic QUV
+
+Step 1
+```{r}
+eemsc1 <- eem_remove_scattering(eemsc1, "rayleigh", 1, 30)
+eemsc1 <- eem_remove_scattering(eemsc1, "rayleigh", 2, 30)
+
+plot(eemsc1, which = 2)
+
+```
+Step 2
+```{r}
+eemsd2 <- eem_remove_scattering(eemsd2, "rayleigh", 1, 30)
+eemsd2 <- eem_remove_scattering(eemsd2, "rayleigh", 2, 30)
+
+
+plot(eemsd2, which = 2)
+
+```
+
+
+Step 3
+```{r}
+eemsc3 <- eem_remove_scattering(eemsc3, "rayleigh", 1, 30)
+eemsc3 <- eem_remove_scattering(eemsc3, "rayleigh", 2, 30)
+
+plot(eemsc3, which = 2)
+
+
+
+```
+
+Step 4
+```{r}
+eemsc4 <- eem_remove_scattering(eemsc4, "rayleigh", 1, 30)
+eemsc4 <- eem_remove_scattering(eemsc4, "rayleigh", 2, 30)
+
+plot(eemsc4, which = 2)
+
+
+```
+
+## DampHeat
+
+Step 1
+```{r}
+eemsd1 <- eem_remove_scattering(eemsd1, "rayleigh", 1, 30)
+eemsd1 <- eem_remove_scattering(eemsd1, "rayleigh", 2, 30)
+
+
+plot(eemsd1, which = 2)
+
+```
+Step 2
+```{r}
+eemsd2 <- eem_remove_scattering(eemsd2, "rayleigh", 1, 30)
+eemsd2 <- eem_remove_scattering(eemsd2, "rayleigh", 2, 30)
+
+
+plot(eemsd2, which = 2)
+
+```
+
+Step 3
+```{r}
+eemsd3 <- eem_remove_scattering(eemsd3, "rayleigh", 1, 30)
+eemsd3 <- eem_remove_scattering(eemsd3, "rayleigh", 2, 30)
+
+plot(eemsd3, which = 2)
+
+
+```
+
+Step 4
+```{r}
+eemsd4 <- eem_remove_scattering(eemsd4, "rayleigh", 1, 30)
+eemsd4 <- eem_remove_scattering(eemsd4, "rayleigh", 2, 30)
+
+plot(eemsd4, which = 2)
+
+```
+
+## HotQUV
+Step 1
+```{r}
+eemsh1 <- eem_remove_scattering(eemsh1, "rayleigh", 1, 30)
+eemsh1 <- eem_remove_scattering(eemsh1, "rayleigh", 2, 30)
+
+
+plot(eemsh1, which = 2)
+
+```
+
+Step 2
+```{r}
+eemsh2 <- eem_remove_scattering(eemsh2, "rayleigh", 1, 30)
+eemsh2 <- eem_remove_scattering(eemsh2, "rayleigh", 2, 30)
+
+
+plot(eemsh2, which = 2)
+
+```
+Step 3
+```{r}
+eemsh3 <- eem_remove_scattering(eemsh3, "rayleigh", 1, 30)
+eemsh3 <- eem_remove_scattering(eemsh3, "rayleigh", 2, 30)
+
+
+plot(eemsh3, which = 2)
+
+```
+Step 4
+```{r}
+eemsh4 <- eem_remove_scattering(eemsh4, "rayleigh", 1, 30)
+eemsh4 <- eem_remove_scattering(eemsh4, "rayleigh", 2, 30)
+
+
+plot(eemsh4, which = 2)
+
+```
+
+# Introduction to PARAFAC
+
+The seminal paper of (C. A. Stedmon, Markager, and Bro 2003) put at the forefront the use of parallel factor analysis (PARAFAC) to aid the characterization of fluorescent DOM. Briefly, this three-way technique allows the decomposition of complex DOM fluorescence signals contained in the excitation-emission matrix (EEM, Fig. 1) into a set of individual chemical components and provides estimations of their relative contribution to the total fluorescence (Bro 1997; Fellman, Hood, and Spencer 2010; C. A. Stedmon, Markager, and Bro 2003).
+
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/3DEEMS.png)
+PARAFAC belongs to a family of so-called multi-way methods applicable to data that are arranged in three- or higher-order arrays. Examples of threeway arrays that can be analysed with PARAFAC include uorescence EEMs (sample excitation wavelength emission wavelength), chromatographic data (GC-MS: sample elution time m/z structure), sensory data (sample attribute judge) and electroencephalography (space time frequency).
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/multiway.png)
+# Tools and corrections
+
+## multiway package in R
+
+Firstly, to maintain the consisitancy, I tried "multiway" package in R. However, since it is a relatively new package, some functions are still not implemented.
+The Description of this package is: Fits multi-way component models via alternating least squares algorithms with optional constraints: orthogonal, non-negative, unimodal, monotonic, periodic, smooth, or structure. Fit models include Individual Differences Scaling, Parallel Factor Analysis (1 and 2), Si- multaneous Component Analysis, and Tucker Factor Analysis.
+However, it only fits the data, and prints constraint, fit, and convergence details of the model. It has no functions to plot the 3D EEMs.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/multiwayR.png)
+During this week's test, I make sure that the multiway package in R can't visualize the PARAFAC data. Therefore I give up doing this procedure solely on R and switch to the backup plans.
+
+## drEEM toolbox in matlab
+
+Experiencing setbacks in R, I try to export the data to matlab to do the PARAFAC analysis. According to the seminal paper of PARAFAC, I install the drEEM package. It can plot PARAFAC digrams with corrected EEM data. Since I finished the data correction in R with eemR package, I use the export method of eemR to create a PARAFAC ready format.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/exporting.png)
+However, the exported data is actually not in correct form.
+The good data of EEM here is a 3-dimensional array.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/mydata.png)
+However, the data exported by eemR package only has one dimension.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/original.png)
+
+To solve this problem, I directly contact the author of the eemR package.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/mail.png)
+Although there are several typos in his mail, this reshape function works in the matlab, and the data which I imported to matlab is now in correct form.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/snip0.png)
+After the correction, I firstly try the free drEEM package.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/correction drEEM.png)
+I will show this procedure in matlab.
+
+
+One problem still remaining is that the drEEM can only plot 2D figures.According to the seminal paper, the three ways of data in drEEM are actually Em, Ex and Samples. This is not very satisfying, since the intensity is an important factor and it also needs to be visualized.
+
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/multiway.png)
+
+As a result, I move to the PLS toolbox.
+
+## PLS toolbox in matlab
+
+Different with the previous two free packages, PLS is commerical, which costs 495$. The advantage of this package is it can generate 3D plots and presents them in a PARAFAC fashion. 
+
+The difference between drEEM and PLS is that PLS needs a data frame. The struct which established in the previous step can't be directly processed by PLS. Therefore I made some further corrections.
+
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/snip1.png)
+
+Firstly, I pull out the double array from the struct and save it into a dataset object.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/snip2.png)
+Simple, but effective.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/snip3.png)
+After this step I use the function below to plot the PARAFAC figure.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/snip4.png)
+This is the one sample plot.The three ways are Ex Em and Intensity.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/untitled2.png)
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/untitled3.png)
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/untitled4.png)
+This is the multi sample plot. The four ways are Ex, Em, Intensity, and Samples.
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/untitled.png)
+As you can see, with the removal bandwidth of 10nm, the residuals are not properly eliminatied.
+Therefore, I increase the bandwidth to 30nm.
+On the other hand, I create a new dataset which includes the spectras of one single PET film in four steps.
+Here, I will show the plot of sample 2 (sa25002) in Cyclic QUV procedure.
+```{r}
+
+sample2 <- system.file("extdata/cary/sample2/", package = "eemR")
+eems <- eem_read(sample2)
+
+eems[[1]]$em<-eems[[1]]$em[1:501]
+eems[[1]]$x<-eems[[1]]$x[c(1:501),c(1:101)]
+eems[[2]]$em<-eems[[2]]$em[1:501]
+eems[[2]]$x<-eems[[2]]$x[c(1:501),c(1:101)]
+eems[[3]]$em<-eems[[3]]$em[1:501]
+eems[[3]]$x<-eems[[3]]$x[c(1:501),c(1:101)]
+eems[[4]]$em<-eems[[4]]$em[1:501]
+eems[[4]]$x<-eems[[4]]$x[c(1:501),c(1:101)]
+eems <- eem_remove_scattering(eems, "rayleigh", 1, 30)
+eems <- eem_remove_scattering(eems, "rayleigh", 2, 30)
+
+plot(eems, which=2)
+
+```
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/2d.png)
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/3d.png)
+![EEM](/Users/Zhan/Desktop/17-PET_Fluorescence/parafac.png)
+
+At this point, the PARAFAC analysis has been successfully performed. Most of the goals of this project have been achieved. One drawback of this procedure is that there are no proper function for removing all of the negative value. And the 3D models of the all other samples except Cyclic QUV sample 25002 should be built.
+
+
+# Solution for removing all the negative values
+
+About the negative value residuals, Professor Bruckman provides me a good idea to address this problem: Remove all the negative area inside the spectra. At this point, I'm trying to find a function which can remove the negative area properly. Apparently, the eemR package does not provides such function. Therefore I may look into other R packages and test them. In the future work, I will finish this part to provide a better model.
+
+# About the quantification
+
+Since the PARAFAC analysis only provide a way of data visualization, the quantification of the data & model still hasn't been finished yet. As a result, I have to look into other seminal paper about the EEM analysis, and contact Devin Gordon to discuss how to design the steps of the quantification.
+
+# Purposed future work
+
+● Build the 3D model for other samples.
+
+● Find a proper way to remove the residual negative values.
+
+● Discuss with Devin Gordon, figure out an ideal way of data quantification.
+
+● Write guidelines for processing fluorescences and reproducing the research procedures.
+
+● Provide insights about the trends with increasing exposure time/steps. 
