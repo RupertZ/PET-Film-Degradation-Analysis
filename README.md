@@ -1,2 +1,2 @@
 # Undergrad_Projects
-This repo includes all projects and researches (public) during my undergrad study
+This repo includes projects and researches of "PET Film Degradation Analysis via Fluorescence Spectroscopy" (public) during my undergrad study
